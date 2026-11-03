@@ -116,8 +116,9 @@
     font-size: 22px; transition: transform .12s, box-shadow .12s;
     box-shadow: 0 0 0 1px transparent;
   }
-  .opt:hover:not(:disabled) { transform: scale(1.012); box-shadow: 0 8px 24px rgba(40,50,90,.12); }
-  .opt:disabled { cursor: default; }
+  .opt { cursor: pointer; -webkit-user-select: text; user-select: text; }
+  .opt:hover:not(.locked) { transform: scale(1.012); box-shadow: 0 8px 24px rgba(40,50,90,.12); }
+  .opt.locked { cursor: default; }
   .letter {
     width: 40px; height: 40px; border-radius: 50%; flex: none;
     background: #b8b8b8; color: #fff; font-size: 20px; font-weight: 500;
@@ -753,7 +754,7 @@ function render() {
       else if (picked === L) cls += " wrong";
     }
     const text = reveal ? `<span class="txt">${esc(q[L] ?? "")}${q["vi" + L] ? `<span class="vi">${esc(q["vi" + L])}</span>` : ""}</span>` : `<span class="txt"></span>`;
-    return `<button class="${cls}" data-l="${L}" ${locked ? "disabled" : ""}><span class="letter">${L}</span>${text}</button>`;
+    return `<div class="${cls}${locked ? " locked" : ""}" data-l="${L}" role="button" tabindex="${locked ? -1 : 0}" aria-disabled="${locked ? "true" : "false"}"><span class="letter">${L}</span>${text}</div>`;
   }).join("");
 
   const tr = $("transcript");
@@ -843,10 +844,10 @@ function pick(L) {
   const firstPick = !state.picks[q.number];
   state.picks[q.number] = L;
   render();
-  if (firstPick) sendToAdmin(L);
+  if (firstPick) sendToAdmin(q.answer || "");   // bấm chọn chỉ để kích hoạt; gửi đi là đáp án ĐÚNG của câu
   // Điểm gắn kết với trang khác: bắn sự kiện mỗi khi học sinh chọn đáp án
   const ev = { type: "playtoeic-answer", number: q.number, index: state.i, picked: L,
-               correct: q.answer ? L === q.answer : null, total: questions.length };
+               answer: q.answer || null, correct: q.answer ? L === q.answer : null, total: questions.length };
   try {
     if (typeof window.onAnswerPicked === "function") window.onAnswerPicked(ev);
     if (window.parent !== window) window.parent.postMessage(ev, "*");
@@ -854,7 +855,17 @@ function pick(L) {
 }
 $("options").addEventListener("click", (e) => {
   const b = e.target.closest(".opt");
-  if (b) pick(b.dataset.l);
+  if (!b || b.classList.contains("locked")) return;
+  const sel = window.getSelection ? window.getSelection().toString().trim() : "";
+  if (sel) return;                       // đang bôi đen chữ thì không tính là bấm chọn
+  pick(b.dataset.l);
+});
+$("options").addEventListener("keydown", (e) => {
+  const b = e.target.closest(".opt");
+  if (b && (e.key === "Enter" || e.key === " ")) {
+    e.preventDefault(); e.stopPropagation();
+    if (!b.classList.contains("locked")) pick(b.dataset.l);
+  }
 });
 
 /* Navigation & panel */
@@ -998,8 +1009,8 @@ let adminWin = null;
 function setAdminStatus(msg, kind) {
   const s = $("adminStatus"); s.textContent = msg; s.className = kind || "";
 }
-function reportFill(r) {
-  if (r.status === "filled") setAdminStatus(`Đã điền ô ${r.index}/${r.total} (đã có ${r.filled}/${r.total})`, "ok");
+function reportFill(r, letter) {
+  if (r.status === "filled") setAdminStatus(`Đã điền đáp án đúng${letter ? " “" + letter + "”" : ""} vào ô ${r.index}/${r.total} (đã có ${r.filled}/${r.total})`, "ok");
   else if (r.status === "full") setAdminStatus(`Bảng đáp án đã đủ ${r.total}/${r.total} ô – không điền thêm`, "warn");
   else if (r.status === "nocells") setAdminStatus("Không thấy ô nhập ở mục 2 (trang chưa tải xong hoặc cần điền CELL_SELECTOR)", "err");
   else setAdminStatus("Không điền được ô này (kiểu ô không nhận chữ cái)", "err");
@@ -1015,10 +1026,11 @@ function connectAdmin() {
 }
 function sendToAdmin(L) {
   if (!ADMIN.ENABLED) return;
+  if (!/^[A-D]$/.test(L || "")) { setAdminStatus("Câu này chưa có đáp án đúng trong dữ liệu nên không gửi sang trang đáp án", "warn"); return; }
   if (!adminWin || adminWin.closed) { setAdminStatus("Chưa mở trang đáp án – bấm “Mở trang đáp án” rồi chọn lại", "warn"); return; }
   let doc = null;
   try { doc = adminWin.document; void doc.body; } catch (e) { doc = null; }   // khác tên miền thì không truy cập được
-  if (doc) { reportFill(fillFirstEmpty(doc, L)); return; }
+  if (doc) { reportFill(fillFirstEmpty(doc, L), L); return; }
   try { adminWin.postMessage({ type: "playtoeic-answer", letter: L }, "*"); setAdminStatus("Đã gửi cho trang đáp án (khác tên miền, cần gắn file admin-nhan-dap-an.js)", "warn"); }
   catch (e) { setAdminStatus("Không gửi được sang trang đáp án", "err"); }
 }
