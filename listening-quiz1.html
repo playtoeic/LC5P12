@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TOEIC Listening</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
     --blue: #1a8cff;
@@ -18,6 +18,20 @@
     --red: #e5484d;
     --panel: #1d2433;
     --panel-btn: #2a3347;
+
+    /* ============ THÔNG SỐ TÙY CHỈNH – chỉnh số ở đây ============ */
+    --vi-gap: 10px;            /* khoảng cách giữa đáp án tiếng Anh và phần dịch tiếng Việt */
+    --q-label-size: 14px;      /* cỡ chữ "Question … of 31" */
+    --q-circle: 30px;          /* vòng tròn số câu hiện tại */
+    --topbar-h: 50px;          /* chiều cao thanh trên cùng */
+    --panel-w: 270px;          /* độ rộng cột cố định (bảng số câu bên phải) */
+    --panel-cell-h: 32px;      /* chiều cao mỗi ô số câu */
+    --panel-cell-font: 14px;   /* cỡ chữ số trong ô */
+    --panel-gap: 6px;          /* khoảng cách giữa các ô số câu */
+    --wm-size: 9vw;            /* cỡ chữ watermark */
+    --wm-color: rgba(100,110,130,.14);   /* màu watermark (xám nhạt, chỉnh số cuối để đậm/nhạt) */
+    --wm-angle: -30deg;        /* độ nghiêng watermark */
+    /* ============================================================ */
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
@@ -33,36 +47,20 @@
 
   /* ===== Top bar ===== */
   .topbar {
-    height: 64px; flex: none;
-    background: #fff;
-    display: flex; align-items: center;
-    border-bottom: 1px solid #e4e6ee;
-    position: relative; z-index: 5;
+    height: var(--topbar-h); flex: none; background: #fff; padding: 0 14px;
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    border-bottom: 1px solid #e4e6ee; position: relative; z-index: 5;
   }
-  .topbar .close-wrap { width: 76px; height: 100%; display: grid; place-items: center; border-right: 1px solid #eee; }
-  .close-btn {
-    width: 40px; height: 40px; border-radius: 50%;
-    background: #e5484d; color: #fff; font-size: 26px; line-height: 1;
-    display: grid; place-items: center;
-  }
-  .topbar .center { flex: 1; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 18px; }
+  .topbar .center { display: flex; justify-content: center; align-items: center; gap: 7px; font-size: var(--q-label-size); }
   .qcircle {
-    width: 44px; height: 44px; border-radius: 50%;
+    width: var(--q-circle); height: var(--q-circle); border-radius: 50%;
     background: var(--blue-soft); color: #fff; font-weight: 500;
-    display: grid; place-items: center; font-size: 18px;
+    display: grid; place-items: center; font-size: calc(var(--q-label-size) + 1px);
   }
   .qcircle:hover { background: var(--blue); }
-  .submit {
-    background: var(--blue); color: #fff; font-size: 18px; font-weight: 500;
-    padding: 9px 24px; border-radius: 12px; margin-right: 14px;
-  }
-  .submit:hover { background: #0a7bf0; }
-  .help {
-    height: 100%; padding: 0 22px; border-left: 1px solid #eee;
-    display: flex; align-items: center; gap: 10px;
-    font-size: 18px; font-weight: 500; color: #4a5568;
-  }
-  .help svg { width: 30px; height: 30px; }
+  .topright { justify-self: end; }
+  .top-admin { background: var(--blue); color: #fff; font-size: 15px; font-weight: 500; padding: 8px 18px; border-radius: 10px; white-space: nowrap; }
+  .top-admin:hover { background: #0a7bf0; }
 
   /* ===== Body ===== */
   .layout { flex: 1; display: flex; min-height: 0; position: relative; }
@@ -130,13 +128,13 @@
   .opt.wrong { box-shadow: 0 0 0 3px var(--red); }
   .opt.wrong .letter { background: var(--red); }
   .opt .txt { flex: 1; }
-  .opt .vi { display: block; font-size: 18px; color: #4b5263; margin-top: 4px; }
+  .opt .vi { display: block; font-size: 18px; color: #4b5263; margin-top: var(--vi-gap); }
 
   .transcript {
     margin-top: 14px; padding: 14px 18px; background: #fff; border-radius: 14px;
     font-size: 20px; line-height: 1.45;
   }
-  .transcript .vi { color: #4b5263; font-size: 18px; margin-top: 4px; }
+  .transcript .vi { color: #4b5263; font-size: 18px; margin-top: var(--vi-gap); }
   .transcript .exp { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); font-size: 18px; color: #3c4254; }
   .transcript b { color: var(--green); }
 
@@ -163,7 +161,7 @@
 
   /* ===== Palette panel (ngăn kéo, mặc định đóng) ===== */
   .panel {
-    position: absolute; top: 0; right: 0; bottom: 0; width: 360px; max-width: 100%;
+    position: absolute; top: 0; right: 0; bottom: 0; width: var(--panel-w); max-width: 100%;
     background: var(--panel); color: #fff; z-index: 6;
     display: flex; flex-direction: column; overflow-y: auto;
     transform: translateX(100%); visibility: hidden;
@@ -171,25 +169,25 @@
     box-shadow: -10px 0 30px rgba(0,0,0,.22);
   }
   .panel.open { transform: none; visibility: visible; transition: transform .22s ease; }
-  .panel-head { background: var(--blue-soft); display: flex; align-items: center; justify-content: center; position: relative; padding: 14px 44px; }
-  .panel-head h2 { margin: 0; font-size: 22px; font-weight: 700; text-align: center; }
-  .panel-close { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border-radius: 50%; font-size: 26px; line-height: 1; color: #fff; }
+  .panel-head { background: var(--blue-soft); display: flex; align-items: center; justify-content: center; position: relative; padding: 9px 36px; }
+  .panel-head h2 { margin: 0; font-size: 16px; font-weight: 700; text-align: center; }
+  .panel-close { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 50%; font-size: 22px; line-height: 1; color: #fff; }
   .panel-close:hover { background: rgba(255,255,255,.2); }
-  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; padding: 16px; }
-  .grid button { height: 40px; border-radius: 8px; background: var(--panel-btn); color: #fff; font-size: 17px; font-weight: 500; }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--panel-gap); padding: 12px; }
+  .grid button { height: var(--panel-cell-h); border-radius: 6px; background: var(--panel-btn); color: #fff; font-size: var(--panel-cell-font); font-weight: 500; }
   .grid button:hover { background: #38445f; }
-  .grid button.current { outline: 3px solid var(--blue-soft); outline-offset: 1px; }
+  .grid button.current { outline: 2px solid var(--blue-soft); outline-offset: 1px; }
   .grid button.answered { background: #46506a; }
   .grid button.correct { background: var(--green); }
   .grid button.wrong { background: var(--red); }
-  .toggle-row { margin-top: auto; padding: 18px 16px; display: flex; align-items: center; justify-content: space-between; font-size: 18px; gap: 10px; }
-  .switch { position: relative; width: 62px; height: 32px; flex: none; }
+  .toggle-row { margin-top: auto; padding: 12px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; gap: 10px; }
+  .switch { position: relative; width: 48px; height: 24px; flex: none; }
   .switch input { opacity: 0; width: 100%; height: 100%; position: absolute; inset: 0; margin: 0; cursor: pointer; z-index: 2; }
-  .switch .track { position: absolute; inset: 4px 0; background: #cfd3dc; border-radius: 20px; transition: .2s; }
-  .switch .knob { position: absolute; top: 0; left: 0; width: 32px; height: 32px; border-radius: 50%; background: #1a8cff; transition: .2s; }
-  .switch input:checked ~ .knob { left: 30px; }
-  /* màn hình rộng: đẩy nội dung sang trái khi mở bảng, đóng bảng thì nội dung dùng hết bề ngang */
-  @media (min-width: 1101px) { .layout.with-panel .main { margin-right: 360px; } }
+  .switch .track { position: absolute; inset: 3px 0; background: #cfd3dc; border-radius: 20px; transition: .2s; }
+  .switch .knob { position: absolute; top: 0; left: 0; width: 24px; height: 24px; border-radius: 50%; background: #1a8cff; transition: .2s; }
+  .switch input:checked ~ .knob { left: 24px; }
+  /* màn hình rộng: đẩy nội dung sang trái khi mở bảng */
+  @media (min-width: 1101px) { .layout.with-panel .main { margin-right: var(--panel-w); } }
 
   /* ===== Thanh dưới cùng ===== */
   .bottombar {
@@ -212,6 +210,27 @@
   .toggle-panel .arr { display: inline-block; transition: transform .2s; }
   .toggle-panel[aria-expanded="false"] .arr { transform: rotate(180deg); }
 
+  /* ===== Nút phát/dừng nổi (luôn hiện khi cuộn) ===== */
+  .float-play {
+    position: fixed; right: 24px; top: 50%; transform: translateY(-50%);
+    width: 60px; height: 60px; border-radius: 50%; z-index: 30;
+    background: var(--blue); color: #fff; display: grid; place-items: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,.28);
+  }
+  .float-play:hover { background: #0a7bf0; }
+  .float-play svg { width: 28px; height: 28px; fill: #fff; }
+
+  /* ===== Watermark chéo (2/3 bên phải màn hình, không chặn thao tác) ===== */
+  .watermark {
+    position: fixed; top: var(--topbar-h); bottom: 52px; left: 33.333vw; right: 0;
+    display: grid; place-items: center; overflow: hidden;
+    pointer-events: none; -webkit-user-select: none; user-select: none; z-index: 4;
+  }
+  .watermark span {
+    font-size: var(--wm-size); font-weight: 900; letter-spacing: .04em; line-height: 1; white-space: nowrap;
+    color: var(--wm-color); transform: rotate(var(--wm-angle));
+  }
+
   /* ===== Result dialog ===== */
   .overlay {
     position: fixed; inset: 0; background: rgba(15,20,35,.55); display: none; place-items: center; z-index: 20; padding: 20px;
@@ -228,15 +247,14 @@
   @media (max-width: 1100px) {
   }
   @media (max-width: 760px) {
-    .topbar { height: 64px; }
-    .topbar .close-wrap { width: 64px; }
-    .close-btn { width: 36px; height: 36px; font-size: 20px; }
-    .topbar .center { font-size: 15px; gap: 6px; }
-    .qcircle { width: 38px; height: 38px; font-size: 16px; }
-    .submit { font-size: 15px; padding: 8px 14px; margin-right: 8px; border-radius: 10px; }
-    .help { padding: 0 10px; font-size: 0; border-left: 0; }
-    .help svg { width: 28px; height: 28px; }
+    .topbar { padding: 0 10px; grid-template-columns: 1fr auto; }
+    .topbar > div:first-child { display: none; }
+    .topbar .center { justify-content: flex-start; }
+    .top-admin { font-size: 13px; padding: 6px 10px; }
     .main { padding: 24px 14px 50px; }
+    :root { --wm-size: 12vw; }
+    .float-play { width: 48px; height: 48px; right: 10px; opacity: .9; }
+    .float-play svg { width: 22px; height: 22px; }
     .player { height: auto; padding: 10px; flex-wrap: wrap; gap: 8px; }
     .circ { width: 46px; height: 46px; font-size: 14px; }
     .circ svg { width: 20px; height: 20px; }
@@ -258,17 +276,13 @@
 <body>
 
 <header class="topbar">
-  <div class="close-wrap"><button class="close-btn" id="btnClose" aria-label="Thoát">&times;</button></div>
+  <div></div>
   <div class="center">
     <span>Question</span>
     <button class="qcircle" id="btnPalette" aria-label="Mở danh sách câu hỏi"><span id="curIdx">1</span></button>
     <span>of <span id="totalQ">50</span></span>
   </div>
-  <button class="submit" id="btnSubmit">Submit</button>
-  <button class="help" id="btnHelp">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 4h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H9l-4 3.5V14H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M21 8v10.5L18 16h-7" stroke-linecap="round"/><path d="M6 8h8M6 11h5" stroke-linecap="round"/></svg>
-    Hỗ trợ giải đáp
-  </button>
+  <div class="topright"><button class="top-admin" id="btnAdmin" type="button">Mở trang đáp án</button></div>
 </header>
 
 <div class="layout">
@@ -322,7 +336,6 @@
 
 <footer class="bottombar">
   <div class="adm">
-    <button id="btnAdmin" type="button">Mở trang đáp án</button>
     <span id="adminStatus">Chưa kết nối trang đáp án</span>
   </div>
   <button class="toggle-panel" id="btnTogglePanel" aria-expanded="true" aria-controls="panel">
@@ -330,17 +343,8 @@
   </button>
 </footer>
 
-<div class="overlay" id="overlay">
-  <div class="dialog" role="dialog" aria-modal="true">
-    <h3>Kết quả</h3>
-    <div class="score" id="rScore">0/0</div>
-    <p id="rDetail"></p>
-    <div class="row">
-      <button id="rReview">Xem lại bài</button>
-      <button id="rRetry" class="primary">Làm lại</button>
-    </div>
-  </div>
-</div>
+<button class="float-play" id="btnFloatPlay" type="button" aria-label="Phát / dừng âm thanh" title="Phát / dừng"></button>
+<div class="watermark" aria-hidden="true"><span id="wmText">PLAYTOEIC</span></div>
 
 <script>
 /* =====================================================================
@@ -711,6 +715,11 @@ const ICON_PAUSE = '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z
 const ICON_VOL = '<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>';
 const ICON_MUTE = '<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13 3 3-3 1.4 1.4-3 3 3 3L19 18l-3-3-3 3-1.4-1.4 3-3-3-3L13 9l3 3z"/></svg>';
 
+function setPlayIcon(playing) {
+  const i = playing ? ICON_PAUSE : ICON_PLAY;
+  $("btnPlay").innerHTML = i;
+  $("btnFloatPlay").innerHTML = i;
+}
 const audio = new Audio();
 audio.preload = "auto";
 const speeds = [1.0, 1.25, 1.5, 0.75];
@@ -795,7 +804,7 @@ function loadAudio(autoplay) {
   audio.playbackRate = speeds[speedIdx];
   $("seek").value = 0; setProgress(0);
   $("tCur").textContent = "00:00"; $("tDur").textContent = "00:00";
-  $("btnPlay").innerHTML = ICON_PLAY;
+  setPlayIcon(false);
   if (autoplay && src) audio.play().catch(() => {});
 }
 
@@ -816,13 +825,14 @@ audio.addEventListener("timeupdate", () => {
   $("seek").value = pct; setProgress(pct);
   $("tCur").textContent = fmt(audio.currentTime);
 });
-audio.addEventListener("play", () => { $("btnPlay").innerHTML = ICON_PAUSE; });
-audio.addEventListener("pause", () => { $("btnPlay").innerHTML = ICON_PLAY; });
-audio.addEventListener("ended", () => { $("btnPlay").innerHTML = ICON_PLAY; });
+audio.addEventListener("play", () => { setPlayIcon(true); });
+audio.addEventListener("pause", () => { setPlayIcon(false); });
+audio.addEventListener("ended", () => { setPlayIcon(false); });
 audio.addEventListener("error", () => {
   if (audio.getAttribute("src")) console.warn("Không tải được file nghe:", audio.src);
 });
 
+$("btnFloatPlay").onclick = () => $("btnPlay").click();
 $("btnPlay").onclick = () => { audio.paused ? audio.play().catch(() => {}) : audio.pause(); };
 $("btnBack").onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 10); };
 $("seek").oninput = (e) => {
@@ -887,7 +897,6 @@ $("grid").addEventListener("click", (e) => {
   if (b) { go(+b.dataset.i); if (window.innerWidth <= 1100) setPanel(false); }
 });
 $("showAns").addEventListener("change", render);
-$("btnHelp").onclick = () => { state.helpOpen = !state.helpOpen; render(); };
 
 document.addEventListener("keydown", (e) => {
   if (e.target.tagName === "INPUT" && e.target.type === "range") return;
@@ -898,30 +907,6 @@ document.addEventListener("keydown", (e) => {
   else if (e.key === "ArrowLeft") go(state.i - 1);
   else if (e.key === " " && e.target.tagName !== "BUTTON") { e.preventDefault(); $("btnPlay").click(); }
 });
-
-/* Submit / result */
-$("btnSubmit").onclick = () => {
-  const withKey = questions.filter((q) => q.answer);
-  const done = Object.keys(state.picks).length;
-  const correct = withKey.filter((q) => state.picks[q.number] === q.answer).length;
-  state.submitted = true;
-  audio.pause();
-  $("rScore").textContent = withKey.length ? `${correct}/${withKey.length}` : `${done}/${questions.length}`;
-  $("rDetail").textContent = withKey.length
-    ? `Bạn đã làm ${done}/${questions.length} câu. Đúng ${correct} câu.`
-    : `Bạn đã làm ${done}/${questions.length} câu. (Chưa có đáp án để chấm điểm.)`;
-  $("overlay").classList.add("open");
-  render();
-};
-$("rReview").onclick = () => $("overlay").classList.remove("open");
-$("rRetry").onclick = () => {
-  state.picks = {}; state.submitted = false; state.helpOpen = false;
-  $("overlay").classList.remove("open");
-  go(0, false);
-};
-$("btnClose").onclick = () => {
-  if (confirm("Thoát bài làm? Kết quả hiện tại sẽ không được lưu.")) location.reload();
-};
 
 /* Ảnh câu hỏi */
 function renderPic(q) {
@@ -1046,7 +1031,7 @@ window.debugAdminCells = () => {
 };
 
 /* Khởi động */
-$("btnPlay").innerHTML = ICON_PLAY;
+setPlayIcon(false);
 $("btnVol").innerHTML = ICON_VOL;
 setPanel(false);
 go(0, false);
